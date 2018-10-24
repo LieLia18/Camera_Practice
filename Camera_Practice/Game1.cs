@@ -1,6 +1,8 @@
-﻿using Microsoft.Xna.Framework;
+﻿using CameraNS;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Sprites;
 
 namespace Camera_Practice
 {
@@ -11,6 +13,14 @@ namespace Camera_Practice
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        Texture2D _background;
+        Texture2D _body;
+        private SimpleSprite sprite;
+        Camera Cam;
+        Vector2 WorldBound = new Vector2(4000, 3000);
+        Rectangle WorldRectangle;
+        float speed = 5.0f;
+        
 
         public Game1()
         {
@@ -39,6 +49,14 @@ namespace Camera_Practice
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            _background = Content.Load<Texture2D>("background");
+            _body = Content.Load<Texture2D>("body");
+            sprite = new SimpleSprite(_body, 
+            GraphicsDevice.Viewport.Bounds.Center.ToVector2());
+            Cam = new Camera(Vector2.Zero,
+                WorldBound
+                );
+            WorldRectangle = new Rectangle(Point.Zero, WorldBound.ToPoint());
 
             // TODO: use this.Content to load your game content here
         }
@@ -62,6 +80,16 @@ namespace Camera_Practice
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
+
+            if (Keyboard.GetState().IsKeyDown(Keys.Right))
+                Cam.move(new Vector2(1, 0) * speed, GraphicsDevice.Viewport);
+            if (Keyboard.GetState().IsKeyDown(Keys.Left))
+                Cam.move(new Vector2(-1, 0) * speed, GraphicsDevice.Viewport);
+            if (Keyboard.GetState().IsKeyDown(Keys.Up))
+                Cam.move(new Vector2(0, -1) * speed, GraphicsDevice.Viewport);
+            if (Keyboard.GetState().IsKeyDown(Keys.Down))
+                Cam.move(new Vector2(0, 1) * speed, GraphicsDevice.Viewport);
+
             // TODO: Add your update logic here
 
             base.Update(gameTime);
@@ -74,8 +102,14 @@ namespace Camera_Practice
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
+            spriteBatch.Begin(SpriteSortMode.BackToFront,
+                                 BlendState.AlphaBlend,
+                                 null, null, null, null, Cam.CurrentCameraTranslation);
+            spriteBatch.Draw(_background, WorldRectangle, Color.White);
+            spriteBatch.End();
 
-            // TODO: Add your drawing code here
+
+
 
             base.Draw(gameTime);
         }
